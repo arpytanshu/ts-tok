@@ -10,9 +10,9 @@ Our tokenization process is like a magician's trick - we take a wild range of ti
 
 
 ### Gaussian Binning
-![media/standardized.png](media/standardized.png)
+![media/standardized.png](images/binned.png)
 Bins are created such that each bin holds a fixed percentage of the total data distribution. This in turn means that the bins around the data mean is much smaller, thus this binning reduces reconstruction error introduced by tokenization.
-![media/tokenization_error.png](media/tokenization_error.png)
+![media/tokenization_error.png](images/tokenization_error.png)
 This also means that reconstruction is wild for data that do not fit well to gaussians. This is a limitation of the approach, but we believe that this is a reasonable trade-off for the simplicity of the approach.
 
 
