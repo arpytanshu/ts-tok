@@ -62,4 +62,18 @@ def reconstruct_timeseries(timestamps, values, time_delta, fill_method='zero', r
         return reconstructed_ts, reconstructed_values
 
 
+def _gen_daily_signal():
+    num_days = 7
+    num_dp_per_day = 24
+    x = np.linspace(0, num_days*2*np.pi, num_dp_per_day*num_days)
+    e = np.random.randn(num_dp_per_day*num_days) * 0.3
+    x = np.sin(x+e) + 5
+    return x
 
+def _gen_monotonic_signal():
+    num_days = 7
+    num_dp_per_day = 24
+    x = np.linspace(0, num_days*2*np.pi, num_dp_per_day*num_days)
+    e = np.random.randn(num_dp_per_day*num_days) * 0.3
+    x = x+e + 5
+    return x

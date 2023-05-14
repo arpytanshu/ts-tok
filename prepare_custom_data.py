@@ -9,10 +9,10 @@ import os
 import pickle
 import matplotlib.pyplot as plt
 
-from gptts.tokenizer import Tokenizer
-from gptts.generic import Config, progress_bar
-from gptts.tsutils import subsequence
-from gptts.configurations import data_config
+from tstok.tokenizer import Tokenizer
+from tstok.generic import Config, progress_bar
+from tstok.tsutils import subsequence
+from tstok.configurations import data_config
 
 
 def norm_and_tokenize(seq, tokenizer):

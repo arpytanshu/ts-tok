@@ -53,4 +53,17 @@ predictions = tokenizer.decode(predict_ids, p)
 Using vanilla GPT-2 from Andrej Karparthy's nanoGPT repo, with the introduced time-series tokenization scheme that converts time-series into sequences of tokens. These tokens are then fed into the GPT model as input during training. The model is trained to predict the next token in the sequence, which is then decoded back into its corresponding time-series value.
 
 
+Some forecasting results can be found in media/output*.png.
+The results are from a model with the following configuration:
+```
+cfg.model.n_embd = 128
+cfg.model.n_head = 8
+cfg.model.block_size = 256
+cfg.model.n_layer = 8
+cfg.model.dropout = 0.05
+```
+with around 6.5M params.
+And was trained on 3000 timeseries with a total of ~3M timestamps for 1000 iterations.
+
+
 We hope you find our experiment intriguing and informative! Our motivations may have been driven by pure adventure-seeking impulses (who doesn't love trying something new?)
