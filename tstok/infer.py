@@ -1,9 +1,9 @@
 
 import torch
 import numpy as np
-from tstok.model import GPT
-from tstok.generic import Config
-from tstok.tokenizer import Tokenizer
+from model import GPT
+from generic import Config
+from tokenizer import Tokenizer
 
 
 def load_stuff(path, device='cpu'):

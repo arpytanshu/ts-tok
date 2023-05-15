@@ -13,27 +13,28 @@ from model import GPT
 from generic import Config
 from configurations import all_config
 from tokenizer import Tokenizer
-from train_utils import estimate_loss, plot_eval, get_lr, CustomDataset
+from train_utils import estimate_loss, plot_eval, get_lr #, CustomDataset
+from data import CustomDataset, get_custom_dataset
 
 
 SEED_OFFSET = 0
-DATA_DIR = '/home/ansh/Documents/checkouts/arpytanshu/gpt-ts/processed_data_256_200bins/' # script arg
-OUT_DIR = '/home/ansh/Documents/checkouts/arpytanshu/gpt-ts/output/test_run_3/' # script arg
+DATA_BASE_PATH = '/Users/arpitanshulnu/Documents/checkout/arpytanshu/all_six_datasets' # script arg
+OUT_DIR = '/Users/arpitanshulnu/Documents/checkout/arpytanshu/ts-tok/local_output/temp/' # script arg
+PERSIST_DIR_BASE = "/content/drive/MyDrive/TEMP/gptts-chkpts/"
 
 offload_to_drive = False
 eval_plot = True
-PERSIST_DIR_BASE = "/content/drive/MyDrive/TEMP/gptts-chkpts/"
 
+DATASET_NAME = 'ettm1'
 
 cfg = Config(config=all_config)
-dataset = CustomDataset(DATA_DIR)
+
 
 
 
 # Mandatory configs to override =======|
 cfg.io.wandb_log = False
 cfg.io.wandb_project = 'gptts'
-cfg.model.vocab_size = dataset.vocab_size # derive vocab_size from the dataset
 cfg.io.out_dir = OUT_DIR
 #======================================|
 
@@ -42,7 +43,7 @@ cfg.io.out_dir = OUT_DIR
 cfg.io.init_from = 'scratch'
 cfg.io.eval_interval = 20
 cfg.io.eval_iters = 5
-cfg.training.device = "cuda:0" #'cuda:0'
+cfg.training.device = "cuda:0" if torch.cuda.is_available() else 'cpu' #'cuda:0'
 cfg.training.grad_accu_steps = 8
 cfg.training.learning_rate = 5e-3
 cfg.data.batch_size = 32
@@ -76,6 +77,8 @@ ctx = nullcontext() if device_type == 'cpu' else torch.amp.autocast(device_type=
 
 tokens_per_iter = cfg.training.grad_accu_steps * cfg.data.batch_size * cfg.model.block_size
 print(f"tokens per iteration will be: {tokens_per_iter:,}")
+
+
 # ==========================================|
 
 
@@ -84,8 +87,9 @@ print(f"tokens per iteration will be: {tokens_per_iter:,}")
 if cfg.io.init_from == 'scratch':
     cfg.io.wandb_run_name = "gptts_run_" + time.strftime('%Y%B%d_%X')
     print('init model using following config:\n', cfg.model)    
-    model = GPT(cfg.model)
     tokenizer = Tokenizer(cfg.data)
+    cfg.model.vocab_size = tokenizer.vocab_size
+    model = GPT(cfg.model)
 
 elif cfg.io.init_from == 'resume':
     print(f"Resuming training from {cfg.io.out_dir}")
@@ -113,11 +117,15 @@ elif cfg.io.init_from == 'resume':
     best_val_loss = checkpoint['best_val_loss']
 
 
+
 # crop down the model block size if desired, using model surgery
 if cfg.model.block_size < model.config.block_size:
     model.crop_block_size(cfg.model.block_size)
     cfg.model.block_size = cfg.model.block_size # so that the checkpoint will have the right value
 model.to(cfg.training.device)
+
+
+dataset = get_custom_dataset(DATA_BASE_PATH, DATASET_NAME, tokenizer, cfg)
 
 # initialize a GradScaler. If enabled=False scaler is a no-op
 scaler = torch.cuda.amp.GradScaler(enabled=(cfg.training.dtype == 'float16'))
@@ -144,7 +152,7 @@ if cfg.io.wandb_log:
     wandb.init(project=cfg.io.wandb_project, name=cfg.io.wandb_run_name)
 
 # training loop
-X, Y = dataset.get_batch('train', cfg.data.batch_size, cfg.training.device) # fetch the very first batch
+X, Y = dataset.get_batch(cfg.data.batch_size, 'train') # fetch the very first batch
 t0 = time.time()
 local_iter_num = 0 # number of iterations in the lifetime of this process
 raw_model = model # unwrap DDP container if needed
@@ -203,7 +211,7 @@ while True:
             logits, loss = model(X, Y)
             loss = loss / cfg.training.grad_accu_steps # scale the loss to account for gradient accumulation
         # immediately async prefetch next batch while model is doing the forward pass on the GPU
-        X, Y = dataset.get_batch('train', cfg.data.batch_size, cfg.training.device)
+        X, Y = dataset.get_batch(cfg.data.batch_size, 'train')
         # backward pass, with gradient scaling if training in fp16
         scaler.scale(loss).backward()
     # clip the gradient

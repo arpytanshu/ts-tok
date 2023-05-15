@@ -3,15 +3,15 @@ import time
 
 data_config = {
     # dataloader
-    "max_seq_len": 512, # 512 + 1 for the target
+    "max_seq_len": 256, # 512 + 1 for the target
     
     # if gradient_accumulation_steps > 1, this is the micro-batch size
     # This is same as the max_seq_len in data_config
     "batch_size": 64,
-
     # tokenizer
     "bin_size": 0.005,
     "max_coverage": .9998,
+    "train_ratio": 0.95
 }
 
 

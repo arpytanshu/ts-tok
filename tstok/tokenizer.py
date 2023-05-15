@@ -39,7 +39,9 @@ class Tokenizer:
     def denorm_std(x, loc, scale):
         return (x.T * (scale) + loc).T
 
-    def clip(self, x, min, max):
+    def clip(self, x):
+        # clips all values in x  thath is smaller than the smallest 
+        # bin or larger than the largest bin.
         return np.clip(x, self.bins[0]+(1e-3), self.bins[-1]-(1e-3))
     
     def encode(self, x, params=None, return_pt=False):
@@ -55,7 +57,7 @@ class Tokenizer:
                 raise ValueError('Input must be 1d or 2d array')
         
         x = self.norm_std(x, **params)
-        x = self.clip(x, self.bins[0], self.bins[-1])
+        x = self.clip(x)
         token_ids = np.clip(np.digitize(x, self.bins, right=False)-1, 0, len(self.bins)-2)
         
         return token_ids, params
@@ -71,4 +73,11 @@ class Tokenizer:
         values = self.bin_values[tkn_id.ravel()].reshape(shape)
         values = self.denorm_std(values, **params)
         return values
+    
+    def digitize(self, X):
+        # wrapper function that does required clippings and digitizations 
+        # of approriately standadized matrices.
+        X_clipped = self.clip(X)
+        return np.clip(np.digitize(X_clipped, self.bins, right=False)-1, 0, len(self.bins)-2)
+
     
