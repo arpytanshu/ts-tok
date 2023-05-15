@@ -168,5 +168,5 @@ out/
 wandb/
 processed_data*/
 dbg_plots/
-output/
+local_output/
 scripts/

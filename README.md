@@ -9,11 +9,13 @@ Introducing our Time-Series Tokenization Experiment! It's so experimental that i
 Our tokenization process is like a magician's trick - we take a wild range of time-series values and transform them into a fixed vocabulary of tokens. How do we do it? With Gaussian binning, of course! We create bins that hold a fixed percentage of the total data distribution, which means smaller bins around the data mean and less reconstruction error introduced by tokenization. Sure, this approach has its limitations for data that don't fit well to Gaussians, but hey, life is all about trade-offs.
 
 
+![images/standardized.png](images/binned.png)
+
 ### Gaussian Binning
-![media/standardized.png](images/binned.png)
 Bins are created such that each bin holds a fixed percentage of the total data distribution. This in turn means that the bins around the data mean is much smaller, thus this binning reduces reconstruction error introduced by tokenization.
-![media/tokenization_error.png](images/tokenization_error.png)
 This also means that reconstruction is wild for data that do not fit well to gaussians. This is a limitation of the approach, but we believe that this is a reasonable trade-off for the simplicity of the approach.
+
+![images/tokenization_error.png](images/tokenization_error.png)
 
 
 ### Tokenization Process
@@ -48,22 +50,19 @@ predictions = tokenizer.decode(predict_ids, p)
 ```
 
 
-### Forecasting Model
+#### Forecasting Model
 
 Using vanilla GPT-2 from Andrej Karparthy's nanoGPT repo, with the introduced time-series tokenization scheme that converts time-series into sequences of tokens. These tokens are then fed into the GPT model as input during training. The model is trained to predict the next token in the sequence, which is then decoded back into its corresponding time-series value.
 
 
-Some forecasting results can be found in media/output*.png.
-The results are from a model with the following configuration:
+Some forecasting results can be found in [output/](output/). The results are from a 6.5M parameters model trained on ~3000 timeseries with a total of ~3M timestamps for 1000 iterations with the following configuration:
 ```
-cfg.model.n_embd = 128
-cfg.model.n_head = 8
-cfg.model.block_size = 256
-cfg.model.n_layer = 8
-cfg.model.dropout = 0.05
+model.n_embd = 128
+model.n_head = 8
+model.block_size = 256
+model.n_layer = 8
+model.dropout = 0.05
 ```
-with around 6.5M params.
-And was trained on 3000 timeseries with a total of ~3M timestamps for 1000 iterations.
 
 
 We hope you find our experiment intriguing and informative! Our motivations may have been driven by pure adventure-seeking impulses (who doesn't love trying something new?)
