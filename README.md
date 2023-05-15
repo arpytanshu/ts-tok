@@ -9,13 +9,13 @@ Introducing our Time-Series Tokenization Experiment! It's so experimental that i
 Our tokenization process is like a magician's trick - we take a wild range of time-series values and transform them into a fixed vocabulary of tokens. How do we do it? With Gaussian binning, of course! We create bins that hold a fixed percentage of the total data distribution, which means smaller bins around the data mean and less reconstruction error introduced by tokenization. Sure, this approach has its limitations for data that don't fit well to Gaussians, but hey, life is all about trade-offs.
 
 
-![images/standardized.png](images/binned.png)
 
 ### Gaussian Binning
+![images/standardized.png](images/binned.png)
 Bins are created such that each bin holds a fixed percentage of the total data distribution. This in turn means that the bins around the data mean is much smaller, thus this binning reduces reconstruction error introduced by tokenization.
-This also means that reconstruction is wild for data that do not fit well to gaussians. This is a limitation of the approach, but we believe that this is a reasonable trade-off for the simplicity of the approach.
-Gaussian Binning is done in the Tokenizer class provided in tstok.tokenizer.Tokenizer
 ![images/tokenization_error.png](images/tokenization_error.png)
+This also means that reconstruction is wild for data that do not fit well to gaussians. This is a limitation of the approach, but we believe that this is a reasonable trade-off for the simplicity of the approach.
+Gaussian Binning is implemented in tstok.tokenizer.Tokenizer
 
 
 ### Tokenization Process
@@ -50,24 +50,21 @@ Also, the target at sequence position `t` is normalized using the standardizatio
         This means that when the value V4 appeared in context window, it was assigned a token b4.
         And when it appeared in target window, it was assigned a token b8.
         b4 and b8 may or may not be same, depending on the stationarity of the series.
+
 ```
-This special target tokenization is done in the collate function provided in tstok.data.collate_fn
+Targe Tokenization is implemented in tstok.data.CustomDataset
 
 
 #### Prediction De-Tokenization
-The predictions need to be de-tokenized to get the actual time-series value. It's done by first mapping the predicted toke id to a bin, and then denormalizing the bin value using parameters of the input series.
+The predictions need to be de-tokenized to get the actual time-series value. It's done by first mapping the predicted token id to a bin, and then denormalizing the bin value using parameters of the input series.
 
-
-This is how a series is tokenized for training, and inference.
+This is how a series is tokenized for inference, and how the prediction is de-tokenized.
 ```
 series = np.random.rand(101)
 
 input = series[:-1]
 target = series[1:] # shifted by 1
 
-# encode method also returns params, which are used:  
-#    1. to encode the target, when making training samples.  
-#    2. to decode the predictions during inference.  
 input_ids, p = tokenizer.encode(input)
 
 target_ids = tokenizer.encode(enc, p)
