@@ -35,7 +35,7 @@ def plot_eval(model, tokenizer, device, path=None):
     fig, axs = plt.subplots(N, 1, figsize=(20, 2*N))
     for ix, temp in enumerate(np.linspace(0.2, 0.99, N)):
         x = _gen_daily_signal()
-        y = gen_forecast(x, model, tokenizer, 100, temperature=temp, top_k=100)
+        y = gen_forecast(x, model, tokenizer, 100, device, temperature=temp, top_k=100)
 
         axs[ix].plot(range(len(x)), y[:len(x)])
         axs[ix].plot(range(len(x), len(y)), y[len(x):])

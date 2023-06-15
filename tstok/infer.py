@@ -15,14 +15,14 @@ def load_stuff(path, device='cpu'):
     model.eval()
     return model, tokenizer
 
-def gen_forecast(series, model, tokenizer, horizon, temperature=0.99, top_k=100):
+def gen_forecast(series, model, tokenizer, horizon, device, temperature=0.99, top_k=100):
     model.eval()
     input_ids, params = tokenizer.encode(series)
     with torch.no_grad():
-        out = model.generate(torch.tensor(input_ids).reshape(1, -1),
+        out = model.generate(torch.tensor(input_ids).reshape(1, -1).to(device),
                                     max_new_tokens=horizon,
                                     temperature=temperature, top_k=top_k)
-    out = out.numpy().ravel()
+    out = out.detach().cpu().numpy().ravel()
     y = tokenizer.decode(out, params)
     return y
 

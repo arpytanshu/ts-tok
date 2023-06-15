@@ -18,8 +18,8 @@ from data import CustomDataset, get_custom_dataset
 
 
 SEED_OFFSET = 0
-DATA_BASE_PATH = '/Users/arpitanshulnu/Documents/checkout/arpytanshu/all_six_datasets' # script arg
-OUT_DIR = '/Users/arpitanshulnu/Documents/checkout/arpytanshu/ts-tok/local_output/temp/' # script arg
+DATA_BASE_PATH = '/shared/datasets/all_six_datasets/all_six_datasets/' # script arg
+OUT_DIR = 'temp/' # script arg
 PERSIST_DIR_BASE = "/content/drive/MyDrive/TEMP/gptts-chkpts/"
 
 offload_to_drive = False
@@ -43,15 +43,15 @@ cfg.io.out_dir = OUT_DIR
 cfg.io.init_from = 'scratch'
 cfg.io.eval_interval = 20
 cfg.io.eval_iters = 5
-cfg.training.device = "cuda:0" if torch.cuda.is_available() else 'cpu' #'cuda:0'
-cfg.training.grad_accu_steps = 8
+cfg.training.device = "cuda" if torch.cuda.is_available() else 'cpu' #'cuda:0'
+cfg.training.grad_accu_steps = 1
 cfg.training.learning_rate = 5e-3
-cfg.data.batch_size = 32
+cfg.data.batch_size = 512
 #======================================|
 
 
 # model condfigs to override ==========|
-cfg.model.n_embd = 128
+cfg.model.n_embd = 256
 cfg.model.n_head = 8
 cfg.model.block_size = 256
 cfg.model.n_layer = 8
@@ -158,6 +158,8 @@ local_iter_num = 0 # number of iterations in the lifetime of this process
 raw_model = model # unwrap DDP container if needed
 running_mfu = -1.0
 
+
+#%%
 
 while True:
 
