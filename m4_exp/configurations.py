@@ -14,13 +14,12 @@ data_config = {
 
 
 model_config = {
-    "n_layer": 6,
-    "n_embd": 128,
-    "n_head": 4,
-    "vocab_size": None, # filled by tokenizer
-    "block_size": 512, 
-    "bias": False,
-    "dropout": 0.1,
+    "vocab_size": None,
+    "hidden_size": 2048,
+    "intermediate_size": 4096,
+    "num_hidden_layers": 8,
+    "num_attention_heads": 4,
+    "max_position_embeddings": None
 }
 
 # only training specific configs
@@ -40,10 +39,11 @@ training_config = {
     "min_lr": 6e-5, # minimum learning rate, should be ~= learning_rate/10 per Chinchilla
 
     # training opts
-    "grad_accu_steps": 5 * 8, # used to simulate larger batch sizes
+    "num_epochs": 3,
+    "grad_accu_steps": 1,
     
     # system - training opts
-    "device": "cpu", # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
+    "device": "cuda:0", # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
     "dtype": "float32", # 'float32', 'bfloat16', or 'float16', the latter will auto implement a GradScaler
     "compile": False, # use PyTorch 2.0 to compile the model to be faster
 }
@@ -57,9 +57,9 @@ logistics_config = {
 
     # I/O
     "out_dir": None, # filled by the script
-    "eval_interval": 20,
-    "log_interval": 1,
-    "eval_iters": 2,                # was 200 in default.
+    "eval_interval": 100,
+    "log_interval": 25,
+    "eval_iters": 20,
     "eval_only": False ,            # if True, script exits right after the first eval
     "always_save_checkpoint": False, # if True, always save a checkpoint after each eval
     "init_from": 'scratch',         # 'scratch' or 'resume'

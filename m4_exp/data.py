@@ -57,7 +57,7 @@ class M4ValDataset(Dataset):
         seq = self.sequences[index]
         input_ids, params = self.tokenizer.encode(seq)
         X = torch.from_numpy(input_ids[:-1]).to(torch.long)
-        Y = torch.from_numpy(input_ids[-1]).to(torch.long)
+        Y = torch.tensor(input_ids[-1]).to(torch.long)
         return X, Y, params
 
 class M4TrainDataLoader:
@@ -68,8 +68,8 @@ class M4TrainDataLoader:
         # each element in series is a 1-array of time-series values
         if series is not None:
             self.series = series
-            self.tr_series = series[:int(len(series) * cfg.data.train_ratio)]
-            self.tr_lengths = [len(s) for s in self.tr_series]
+            self.num_series = len(series)
+            self.lengths = [len(s) for s in self.series]
             self.mode = 'train'
 
         self.max_seq_len = cfg.data.max_seq_len
@@ -78,14 +78,14 @@ class M4TrainDataLoader:
 
     def _get_training_sequence(self):    
         # randomly select a series.
-        series_ix = np.random.randint(len(self.tr_series))
+        series_ix = np.random.randint(self.num_series)
         # randomly select start index for a subsequence.
-        ts_start_ix = np.random.randint(0, self.tr_lengths[series_ix] - self.max_seq_len)
+        ts_start_ix = np.random.randint(0, self.lengths[series_ix] - self.max_seq_len)
         # slice subsequence.
         sequence = self.series[series_ix][ts_start_ix:ts_start_ix+self.max_seq_len+1]
         return sequence
         
-    def get_training_batch(self, batch_size):
+    def get_batch(self, batch_size):
         
         seqs = []
         for _ in range(batch_size):
@@ -106,6 +106,9 @@ class M4TrainDataLoader:
         # else:
         #     x, y = x.to(self.device), y.to(self.device)
         return X_ids, Y_ids
+    
+    def approx_num_samples(self):
+        return sum([len(x) - self.max_seq_len for x in self.series])
 
    
 def get_training_series(tr_df, te_df, include_val_data=False):
@@ -179,13 +182,13 @@ def get_dataloaders(base_path, data_name, tokenizer, cfg, validation=True):
     return_dict['train'] = train_dataloader
     
     test_seqs = val_test_seqs['test']
-    test_dataset = M4ValDataset(test_seqs, tokenizer, cfg, model='test')
+    test_dataset = M4ValDataset(test_seqs, tokenizer, cfg, mode='test')
     test_dataloader = DataLoader(test_dataset, batch_size=cfg.data.val_batch_size, shuffle=False)
     return_dict['test'] = test_dataloader
     
     if validation:
         val_seqs = val_test_seqs['val']
-        val_dataset = M4ValDataset(val_seqs, tokenizer, cfg, model='val')
+        val_dataset = M4ValDataset(val_seqs, tokenizer, cfg, mode='val')
         val_dataloader = DataLoader(val_dataset, batch_size=cfg.data.val_batch_size, shuffle=False)
         return_dict['val'] = val_dataloader
 
