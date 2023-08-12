@@ -8,11 +8,11 @@ class Config:
         if path is not None:
             self.load_json(path)
         elif config is not None:
-            self._load_dict(config)
+            self.load_state_dict(config)
         else:
             raise Exception("At least one of 'config' or 'path' must be provided.")
     
-    def _get_dict(self): # get the config values as a dictionary.
+    def state_dict(self): # get the config values as a dictionary.
         dump_dict = {}
         for k in self.__dict__.keys():
             v = self.__dict__[k]
@@ -23,16 +23,16 @@ class Config:
         return dump_dict
 
     def save_json(self, path): # save a Config object into a json file.
-        dump_dict = self._get_dict()
+        dump_dict = self.state_dict()
         with open(path, 'w') as f:
             json.dump(dump_dict, f)
     
     def load_json(self, path): # load a json file into Config object.
         with open(path, 'r') as f:
             load_dict = json.load(f)
-        self._load_dict(load_dict)
+        self.load_state_dict(load_dict)
     
-    def _load_dict(self, d): # load a dictionary into Config object.
+    def load_state_dict(self, d): # load a dictionary into Config object.
         for k in d.keys():
             v = d[k]
             if type(v) == dict:
