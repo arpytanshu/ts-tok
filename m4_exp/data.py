@@ -12,26 +12,33 @@ data_name_mapping = {
     "hourly":{
         "tr": "Hourly-train.csv",
         "te": "Hourly-test.csv",
+        "m": 24,
     },
     "monthly":{
         "tr": "Monthly-train.csv",
         "te": "Monthly-train.csv",
+        "m": 12,
     },
     "daily":{
         "tr": "Daily-train.csv",
         "te": "Daily-test.csv",
+        "m": 1,
+
     },
     "quarterly":{
         "tr": "Quarterly-train.csv",
         "te": "Quarterly-train.csv",
+        "m": 4,
     },
     "weekly":{
         "tr": "Weekly-train.csv",
         "te": "Weekly-train.csv",
+        "m": 1,
     },
     "yearly":{
         "tr": "Yearly-train.csv",
         "te": "Yearly-train.csv",
+        "m": 1,
     }    
 }
 
@@ -127,7 +134,8 @@ def get_training_series(tr_df, te_df, include_val_data=False):
             training_series.append(tr_series[:-val_len])
     return training_series
 
-def get_validataion_sequences(tr_df, te_df, cfg, return_val=True):
+
+def get_validation_sequences(tr_df, te_df, cfg, return_sample_lengths=False, return_val=True):
     # X: A list of list of series. (batch_size x max_seq_len)
     # which is the input to the model for validation / evaluation.
     # Y: A list of targets. (batch_size x 1)
@@ -167,13 +175,39 @@ def get_validataion_sequences(tr_df, te_df, cfg, return_val=True):
     
     return return_dict
 
+
+def get_stacked_series(base_path, data_name):
+
+    tr_df = pd.read_csv(os.path.join(base_path, data_name_mapping[data_name]['tr']))
+    te_df = pd.read_csv(os.path.join(base_path, data_name_mapping[data_name]['te']))
+
+
+    all_series = []
+    sample_lengths = []
+    test_lengths = []
+    for (_, tr_row), (_, te_row) in zip(tr_df.iterrows(), te_df.iterrows()):
+        tr_vals = tr_row.dropna().values[1:]
+        te_vals = te_row.dropna().values[1:]
+        series = np.hstack([tr_vals, te_vals])
+        all_series.append(series)
+        sample_lengths.append(len(tr_vals))
+        test_lengths.append(len(te_vals))
+    
+    return_dict = {
+        'all_series':all_series,
+        'sample_lengths':sample_lengths,
+        'test_lengths':test_lengths
+        }
+    
+    return return_dict
+
 def get_dataloaders(base_path, data_name, tokenizer, cfg, validation=True):
 
     tr_df = pd.read_csv(os.path.join(base_path, data_name_mapping[data_name]['tr']))
     te_df = pd.read_csv(os.path.join(base_path, data_name_mapping[data_name]['te']))
 
 
-    val_test_seqs = get_validataion_sequences(tr_df, te_df, cfg, return_val=validation)
+    val_test_seqs = get_validation_sequences(tr_df, te_df, cfg, return_val=validation)
     training_series = get_training_series(tr_df, te_df, include_val_data=validation)
     
     return_dict = {}
