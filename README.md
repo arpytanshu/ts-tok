@@ -1,4 +1,7 @@
-# time-series tokenization ts-tok
+# Time Series Tokenizer for Transformers [ ts-tok ]
+
+This repo is an experimental approach that explores a tokenization method that can effeciently tokenize a time-series, for consumption by a NLP Language Model, with 0 changes required in model code.
+The training process used here is also a generic training method one would use for a Transformer for NLP.
 
 Welcome to the wacky world of time-series tokenization with ts-tok! 
 
@@ -75,10 +78,10 @@ predictions = tokenizer.decode(predict_ids, p)
 ```
 
 
-#### Forecasting Model
+### Validation Experiment (initial validation experiment, code in custom_exp/)
 
 Using vanilla GPT-2 model and trainer from [Andrej Karparthy's nanoGPT repo](https://github.com/karpathy/nanoGPT), with the introduced time-series tokenization scheme that converts time-series into sequences of tokens. These tokens are then fed into the GPT model as input during training. The model is trained to predict the next token in the sequence, which is then decoded back into its corresponding time-series value.
-
+This experiment was used to test the feasibility of this tokenization scheme
 
 Some forecasting results can be found in [output/](output/). The results are from a 6.5M parameters model trained on ~3000 timeseries with a total of ~3M timestamps for 1000 iterations with the following configuration:
 ```
@@ -90,4 +93,32 @@ model.dropout = 0.05
 ```
 
 
-We hope you find our experiment intriguing and informative! Our motivations may have been driven by pure adventure-seeking impulses (who doesn't love trying something new?)
+### M4 Experiment
+Using mostly everything as described in the last section, except changed the causalLM model here, and did not use the Target Tokenization scheme described above. 
+Instead, a sequence of length `max_seq_len` was normalized using its own statistics, and digitized to get the input_ids.
+Using LlamaForCausalLM implementation from HF.  
+
+    model_config = {  
+        "vocab_size":   None,  
+        "hidden_size": 256,  
+        "intermediate_size": 512,
+        "num_hidden_layers": 4,
+        "num_attention_heads": 4,
+        "max_position_embeddings": None
+    }
+    
+The dataset used was 414 hourly time-series from the M4 dataset. The minimum and maximum number of observations in the time-series were 700~900, excluding the test observations.  
+`m4_trainer.py` is the training script for this experiment.
+The `m4_evaluator.py` script can be used to generate the test plots and report the sMAPE and MASE numbers for this dataset.
+
+A small sample of forecasts/generations on the test set of the M4 hourly dataset is shown here:
+![images/m4_hourly_results.png](images/m4_hourly_results.png)
+
+
+
+
+
+
+
+
+#### I hope you find this experiment intriguing and informative! The motivations have been driven by pure adventure-seeking impulses. :p

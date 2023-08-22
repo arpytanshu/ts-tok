@@ -23,7 +23,7 @@ from transformers import get_scheduler
 M4_DATASET_PATH = "/shared/datasets/m4_dataset"
 DATANAME = "hourly"
 CHECKPOINT_BASE_PATH = "/shared/CO/arpytanshu_/ts-tok/checkpoints/"
-EXPERIMENT_NAME = 'dev4'
+EXPERIMENT_NAME = 'dev7'
 
 
 
@@ -36,10 +36,10 @@ cfg = Config(config=all_config)
 cfg.data.max_seq_len = 512
 
 # hotpluggable configs - change work across resumes.
-cfg.data.tr_batch_size = 32
+cfg.data.tr_batch_size = 96
 cfg.data.val_batch_size = 512
 cfg.training.grad_accu_steps = 4
-cfg.training.learning_rate = 1e-3
+cfg.training.learning_rate = 6e-4
 cfg.training.grad_checkpointing = False
 
 
@@ -134,8 +134,8 @@ if not os.path.exists(checkpoint_path):
 
 # load from checkpoint
 else:
-    print(f"A checkpoint already seems to exist at {checkpoint_path=}")
-    print(f"Attempting load, if successful, will resume training.")
+    print(f"A checkpoint already exists at {checkpoint_path=}")
+    print(f"Attempting load...")
     
     chkpt               = torch.load(checkpoint_path)
 
@@ -147,10 +147,14 @@ else:
     model.load_state_dict(chkpt['model'])
     optimizer           = AdamW(model.parameters())
     optimizer.load_state_dict(chkpt['optimizer'])
-    lr_scheduler        = get_scheduler(name="linear",
+    lr_scheduler        = get_scheduler(name="cosine",
                                     optimizer=optimizer,
                                     num_warmup_steps=0,
                                     num_training_steps=num_training_steps)
+    lr_scheduler.load_state_dict(chkpt['lr_scheduler'])
+    lr_scheduler.step()
+    print(f"Load successful. Resuming train loop...")
+
 
 if cfg.io.wandb_log:
     import wandb

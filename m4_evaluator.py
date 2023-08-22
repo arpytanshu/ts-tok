@@ -20,7 +20,7 @@ from tstok.generic import Config, progress_bar
 # script args
 M4_DATASET_PATH = "/shared/datasets/m4_dataset"
 DATANAME = "hourly"
-CHECKPOINT_PATH = "/shared/CO/arpytanshu_/ts-tok/checkpoints/dev3/chkpt.pt"
+CHECKPOINT_PATH = "/shared/CO/arpytanshu_/ts-tok/checkpoints/dev7/chkpt.pt"
 
 
 
@@ -52,8 +52,8 @@ print(f"Loading Checkpoint with {best_val_loss=} is successful.")
 
 #%%
 
-plot=False
-plot_save_dir = "/shared/CO/arpytanshu_/ts-tok/explorations/m4_plots/generations/"
+plot=True
+plot_save_dir = "/shared/CO/arpytanshu_/ts-tok/explorations/m4_plots/generations_dev7/"
 
 test_sequences = get_stacked_series(M4_DATASET_PATH, DATANAME)
 
@@ -100,17 +100,17 @@ for ix in range(num_series):
 
     if plot:
         plt.figure(figsize=(20, 4))
-        plt.plot(range(sample_len), series[:sample_len], c='b', label='context_series')
-        plt.plot(range(sample_len, sample_len+horizon), series[sample_len:], '--', c='b', label='test_series')
-        plt.plot(range(sample_len, sample_len+horizon), context[-horizon:], c='g', alpha=0.6, label='generation')
+        plt.plot(range(MSL), series[-horizon-MSL:-horizon], c='b', label='context_series')
+        plt.plot(range(MSL, MSL+horizon), series[sample_len:], '--', c='b', label='test_series')
+        plt.plot(range(MSL, MSL+horizon), context[-horizon:], c='r', alpha=0.6, label='generation')
         plt.title(str(ix))
         plt.legend()
         plt.savefig(os.path.join(plot_save_dir, str(ix)+'.png'))
         plt.close()
     progress_bar(ix, num_series, 50)
+    break;
 
-
-
+print()
 print(f"Average MASE :: {sum(metric_MASE) / len(metric_MASE)}")
 print(f"Average sMAPE :: {sum(metric_sMAPE) / len(metric_sMAPE)}")
 print(f"Average elapsed :: {sum(elapsed) / len(elapsed)}")

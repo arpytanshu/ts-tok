@@ -15,9 +15,9 @@ data_config = {
 
 model_config = {
     "vocab_size": None,
-    "hidden_size": 2048,
-    "intermediate_size": 4096,
-    "num_hidden_layers": 8,
+    "hidden_size": 256,
+    "intermediate_size": 512,
+    "num_hidden_layers": 4,
     "num_attention_heads": 4,
     "max_position_embeddings": None
 }
@@ -25,7 +25,7 @@ model_config = {
 # only training specific configs
 training_config = {
     # adamw optimizer
-    "learning_rate": 5e-3,              # max learning rate
+    "learning_rate": 6e-4,              # max learning rate
     "max_iters": 600000,                # total number of training iterations
     "weight_decay": 1e-1,
     "beta1": 0.9,
