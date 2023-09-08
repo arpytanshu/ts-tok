@@ -5,11 +5,11 @@ The method was developed as an intuitive way to get an approximate token represe
 The training process used here is also a generic training method one would use for a Transformer for NLP.
 
 ![images/tokenization_error.png](images/SAX.png)
-Although the method was developed intuitively, it is exactly what Symbolic Aggregate approXimation (SAX).  SAX was invented by Dr. Eamonn Keogh of the University of California at Riverside. And more detaile about it can be found here: https://www.cs.ucr.edu/~eamonn/SAX.htm
+Although the method was developed intuitively, it is exactly what Symbolic Aggregate approXimation (SAX)  does.  SAX was invented by Dr. Eamonn Keogh of the University of California at Riverside. And more details about it can be found here: https://www.cs.ucr.edu/~eamonn/SAX.htm
 
 ### Gaussian Binning
 ![images/standardized.png](images/binned.png)
-Bins are created such that each bin holds a fixed percentage of the total data distribution. This in turn means that the bins around the data mean is much smaller, thus this binning reduces reconstruction error introduced by tokenization.
+Instead of fixed size bins, the bins are created such that each bin holds a fixed percentage of the total data distribution. This in turn means that the bins around the data mean is much smaller, thus this binning reduces reconstruction error introduced by tokenization.
 ![images/tokenization_error.png](images/tokenization_error.png)
 This also means that reconstruction is wild for data that do not fit well to gaussians. This is a limitation of the approach, but we believe that this is a reasonable trade-off for the simplicity of the approach.
 Gaussian Binning is implemented in tstok.tokenizer.Tokenizer
