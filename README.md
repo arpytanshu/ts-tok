@@ -1,17 +1,11 @@
-# Time Series Tokenizer for Transformers [ ts-tok ]
+# Time Series Tokenizer for Transformers inspired by Symbolic Aggregate approXimation (SAX) [ ts-tok ]
 
 This repo is an experimental approach that explores a tokenization method that can effeciently tokenize a time-series, for consumption by a NLP Language Model, with 0 changes required in model code.
+The method was developed as an intuitive way to get an approximate token representation, that can be used across time-series while their relative values being presserved. And also enabling re-construction of original time-series (with some approximation errors).
 The training process used here is also a generic training method one would use for a Transformer for NLP.
 
-Welcome to the wacky world of time-series tokenization with ts-tok! 
-
-Are you tired of boring old regression approaches to time-series forecasting? Look no further, because we've got an experimental project that will blow your mind (or at least make you scratch your head in confusion).
-
-Introducing our Time-Series Tokenization Experiment! It's so experimental that it may not have any practical applications in the real world, but who cares about practicality when you're having fun?
-
-Our tokenization process is like a magician's trick - we take a wild range of time-series values and transform them into a fixed vocabulary of tokens. How do we do it? With Gaussian binning, of course! We create bins that hold a fixed percentage of the total data distribution, which means smaller bins around the data mean and less reconstruction error introduced by tokenization. Sure, this approach has its limitations for data that don't fit well to Gaussians, but hey, life is all about trade-offs.
-
-
+![images/tokenization_error.png](images/SAX.png)
+Although the method was developed intuitively, it is exactly what Symbolic Aggregate approXimation (SAX).  SAX was invented by Dr. Eamonn Keogh of the University of California at Riverside. And more detaile about it can be found here: https://www.cs.ucr.edu/~eamonn/SAX.htm
 
 ### Gaussian Binning
 ![images/standardized.png](images/binned.png)
