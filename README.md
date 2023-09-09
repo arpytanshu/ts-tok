@@ -1,24 +1,24 @@
 # Time Series Tokenizer for Transformers inspired by Symbolic Aggregate approXimation (SAX) [ ts-tok ]
 
-This repo is an experimental approach that explores a tokenization method that can effeciently tokenize a time-series, for consumption by a NLP Language Model, with 0 changes required in model code.
-The method was developed as an intuitive way to get an approximate token representation, that can be used across time-series while their relative values being presserved. And also enabling re-construction of original time-series (with some approximation errors).
-The training process used here is also a generic training method one would use for a Transformer for NLP.
-
-![images/tokenization_error.png](images/SAX.png)
-Although the method was developed intuitively, it is exactly what Symbolic Aggregate approXimation (SAX)  does.  SAX was invented by Dr. Eamonn Keogh of the University of California at Riverside. And more details about it can be found here: https://www.cs.ucr.edu/~eamonn/SAX.htm
-
-### Gaussian Binning
-![images/standardized.png](images/binned.png)
-Instead of fixed size bins, the bins are created such that each bin holds a fixed percentage of the total data distribution. This in turn means that the bins around the data mean is much smaller, thus this binning reduces reconstruction error introduced by tokenization.
-![images/tokenization_error.png](images/tokenization_error.png)
-This also means that reconstruction is wild for data that do not fit well to gaussians. This is a limitation of the approach, but we believe that this is a reasonable trade-off for the simplicity of the approach.
-Gaussian Binning is implemented in tstok.tokenizer.Tokenizer
+This repo is an experimental approach that explores a tokenization method that can efficiently tokenize a time-series, for consumption by a NLP Language Model.  
+The method was developed as an intuitive way to get an approximate token representation for a time-series, that can be used across time-series while their relative values within a training sequence being preserved and also enabling re-construction of original time-series (with some approximation errors).  
+The training process used here is a generic training method one would use for a Language Modelling task using Transformers.
 
 
 ### Tokenization Process
 
 Since values of a time-series can vary in a wild range, a transformation that converts the series into a fixed interpretable vocabulary of tokens is required, which is taken care of by the tokenization process. To ensure a fixed vocabulary for all time-series, the tokenization process used in this project involves standardizing and binning each context window seperately to create a sequence of tokens.
 
+#### Gaussian Binning
+![images/standardized.png](images/binned.png)
+Instead of fixed size bins, the bins are created such that each bin holds a fixed percentage of the total data distribution. This in turn means that the bins around the data mean is much smaller, thus this binning reduces reconstruction error introduced by tokenization.
+
+![images/tokenization_error.png](images/tokenization_error.png)
+This also means that reconstruction is wild for data that do not fit well to gaussians. This is a limitation of the approach, but we believe that this is a reasonable trade-off for the simplicity of the approach.
+Gaussian Binning is implemented in tstok.tokenizer.Tokenizer
+
+![images/tokenization_error.png](images/SAX.png)
+Symbolic Aggregate approXimation (SAX) does Gaussian Binning as a specials case, but also does dimensionality reduction. SAX was invented by Dr. Eamonn Keogh of the University of California, Riverside. More details about it can be found here: https://www.cs.ucr.edu/~eamonn/SAX.htm
 
 #### Target Tokenization
 The targets are also standardized using the same parameters as the context window before being binned. This approach enables forecasting of monotonically increasing/decreasing sequences, even when the context window is not stationary.  
@@ -72,21 +72,6 @@ predictions = tokenizer.decode(predict_ids, p)
 ```
 
 
-### Validation Experiment (initial validation experiment, code in custom_exp/)
-
-Using vanilla GPT-2 model and trainer from [Andrej Karparthy's nanoGPT repo](https://github.com/karpathy/nanoGPT), with the introduced time-series tokenization scheme that converts time-series into sequences of tokens. These tokens are then fed into the GPT model as input during training. The model is trained to predict the next token in the sequence, which is then decoded back into its corresponding time-series value.
-This experiment was used to test the feasibility of this tokenization scheme
-
-Some forecasting results can be found in [output/](output/). The results are from a 6.5M parameters model trained on ~3000 timeseries with a total of ~3M timestamps for 1000 iterations with the following configuration:
-```
-model.n_embd = 128
-model.n_head = 8
-model.block_size = 256
-model.n_layer = 8
-model.dropout = 0.05
-```
-
-
 ### M4 Experiment
 Using mostly everything as described in the last section, except changed the causalLM model here, and did not use the Target Tokenization scheme described above. 
 Instead, a sequence of length `max_seq_len` was normalized using its own statistics, and digitized to get the input_ids.
@@ -109,10 +94,19 @@ A small sample of forecasts/generations on the test set of the M4 hourly dataset
 ![images/m4_hourly_results.png](images/m4_hourly_results.png)
 
 
+### Validation Experiment (initial validation experiment, code in custom_exp/)
+
+Using vanilla GPT-2 model and trainer from [Andrej Karparthy's nanoGPT repo](https://github.com/karpathy/nanoGPT), with the introduced time-series tokenization scheme that converts time-series into sequences of tokens. These tokens are then fed into the GPT model as input during training. The model is trained to predict the next token in the sequence, which is then decoded back into its corresponding time-series value.
+This experiment was used to test the feasibility of this tokenization scheme
+
+Some forecasting results can be found in [output/](output/). The results are from a 6.5M parameters model trained on ~3000 timeseries with a total of ~3M timestamps for 1000 iterations with the following configuration:
+```
+model.n_embd = 128
+model.n_head = 8
+model.block_size = 256
+model.n_layer = 8
+model.dropout = 0.05
+```
 
 
 
-
-
-
-#### I hope you find this experiment intriguing and informative! The motivations have been driven by pure adventure-seeking impulses. :p
