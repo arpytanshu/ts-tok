@@ -4,6 +4,10 @@ This repo is an experimental approach that explores a tokenization method that c
 The method was developed as an intuitive way to get an approximate token representation for a time-series, that can be used across time-series while their relative values within a training sequence being preserved and also enabling re-construction of original time-series (with some approximation errors).  
 The training process used here is a generic training method one would use for a Language Modelling task using Transformers.
 
+<br>  
+
+***
+<br>  
 
 ### Tokenization Process
 
@@ -71,6 +75,10 @@ predictions = tokenizer.decode(predict_ids, p)
 
 ```
 
+<br>  
+
+***
+<br>  
 
 ### M4 Experiment
 Using mostly everything as described in the last section, except changed the causalLM model here, and did not use the Target Tokenization scheme described above. 
@@ -92,6 +100,12 @@ The `m4_evaluator.py` script can be used to generate the test plots and report t
 
 A small sample of forecasts/generations on the test set of the M4 hourly dataset is shown here:
 ![images/m4_hourly_results.png](images/m4_hourly_results.png)
+
+
+<br>  
+
+***
+<br>  
 
 
 ### Validation Experiment (initial validation experiment, code in custom_exp/)
